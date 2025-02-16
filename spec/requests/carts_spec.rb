@@ -1,7 +1,24 @@
 require 'rails_helper'
 
 RSpec.describe "/carts", type: :request do
-  pending "TODO: Escreva os testes de comportamento do controller de carrinho necessários para cobrir a sua implmentação #{__FILE__}"
+  describe "GET /carts/:id" do
+    let(:cart) { create(:cart) }
+
+    it "returns the cart details" do
+      get cart_path(cart.id)
+
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)).to include("id" => cart.id)
+    end
+
+    it "returns a not found error if the cart does not exist" do
+      get cart_path(999)
+
+      expect(response).to have_http_status(:not_found)
+      expect(JSON.parse(response.body)).to include("error" => "Carrinho não encontrado")
+    end
+  end
+
   describe "POST /add_items" do
     let(:cart) { Cart.create }
     let(:product) { Product.create(name: "Test Product", price: 10.0) }
