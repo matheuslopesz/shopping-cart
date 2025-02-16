@@ -18,7 +18,10 @@ gem 'guard-livereload', require: false
 group :development, :test do
   gem "debug", platforms: %i[ mri windows ]
   gem 'rspec-rails', '~> 6.1.0'
+  gem "factory_bot", "~> 6.5"
+  gem "faker", "~> 2.18"
+  gem "byebug", platforms: %i[ mri mingw x64_mingw ]
 end
 
-group :development do
-end
+
+
