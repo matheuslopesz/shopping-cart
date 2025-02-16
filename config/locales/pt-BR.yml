@@ -1,0 +1,7 @@
+pt-BR:
+  cart_item_validator:
+    errors:
+      product_id_required: "ID do produto é obrigatório"
+      invalid_quantity: "A quantidade deve ser maior que 0"
+      product_not_found: "Produto não encontrado"
+      product_in_cart: "Produto já está no carrinho"
