@@ -7,5 +7,9 @@ Rails.application.routes.draw do
 
   root "rails/health#show"
 
-  resources :carts, only: [:show]
+  resources :carts, only: [:show] do
+    collection do
+      post :add_items
+    end
+  end
 end
