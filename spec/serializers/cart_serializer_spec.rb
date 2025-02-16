@@ -23,15 +23,15 @@ RSpec.describe CartSerializer do
           id: product1.id,
           name: product1.name,
           quantity: 2,
-          unit_price: "10.0",
-          total_price: "20.0"
+          unit_price: 10.00,
+          total_price: 20.00
         },
         {
           id: product2.id,
           name: product2.name,
           quantity: 1,
-          unit_price: "20.0",
-          total_price: "20.0"
+          unit_price: 20.00,
+          total_price: 20.00
         }
       ])
     end
