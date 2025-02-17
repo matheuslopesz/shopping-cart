@@ -175,4 +175,34 @@ RSpec.describe "/carts", type: :request do
       end
     end
   end
+
+  describe "DELETE /carts/remove_item" do
+    let(:cart) { create(:cart) }
+    let(:product) { create(:product) }
+  
+    before do
+      cart.cart_items.create(product: product, quantity: 2)
+    end
+  
+    it 'removes the product from the cart' do
+      delete "/carts/remove_item", params: { product_id: product.id, cart_id: cart.id }
+  
+      expect(response).to have_http_status(:ok)
+      expect(JSON.parse(response.body)['products']).to be_empty
+    end
+  
+    it 'returns an error if the product is not in the cart' do
+      delete "/carts/remove_item", params: { product_id: 999, cart_id: cart.id }
+  
+      expect(response).to have_http_status(:unprocessable_entity)
+      expect(JSON.parse(response.body)['errors']).to include('Produto não encontrado no carrinho')
+    end
+  
+    it 'returns an error if the cart does not exist' do
+      delete "/carts/remove_item", params: { product_id: product.id, cart_id: 999 }
+  
+      expect(response).to have_http_status(:not_found)
+      expect(JSON.parse(response.body)['error']).to eq('Carrinho não encontrado')
+    end
+  end
 end

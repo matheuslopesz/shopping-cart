@@ -32,6 +32,22 @@ class CartsController < ApplicationController
     end
   end
 
+  def remove_item
+    @cart = Cart.find_by(id: params[:cart_id])
+
+    if @cart
+      service = CartItems::RemoveService.new(@cart, params[:product_id])
+
+      if service.run
+        render json: CartSerializer.new(@cart.reload).serialize, status: :ok
+      else
+        render json: { errors: service.errors }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: "Carrinho não encontrado" }, status: :not_found
+    end
+  end
+
   private
 
   def set_cart
