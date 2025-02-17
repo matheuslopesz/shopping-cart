@@ -11,7 +11,6 @@ class CartItemValidator
     validate_product_id
     validate_quantity
     validate_product
-    validate_product_in_cart
 
     errors.empty?
   end
@@ -30,20 +29,12 @@ class CartItemValidator
     add_error(I18n.t('cart_item_validator.errors.product_not_found')) unless product
   end
 
-  def validate_product_in_cart
-    add_error(I18n.t('cart_item_validator.errors.product_in_cart')) if product_in_cart?
-  end
-
   def invalid_quantity?
     params[:quantity].to_i <= 0
   end
 
   def product
     @product ||= Product.find_by(id: params[:product_id])
-  end
-
-  def product_in_cart?
-    cart.cart_items.exists?(product_id: params[:product_id])
   end
 
   def add_error(message)

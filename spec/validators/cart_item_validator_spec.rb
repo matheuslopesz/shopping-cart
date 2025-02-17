@@ -59,19 +59,5 @@ RSpec.describe CartItemValidator do
         expect(subject.errors).to include('Product not found')
       end
     end
-
-    context 'when product already present in cart' do
-      before { create(:cart_item, cart: cart, product: product) }
-      let(:params) { valid_params }
-
-      it 'returns false' do
-        expect(subject.valid?).to be false
-      end
-
-      it 'adds a product already exists error' do
-        subject.valid?
-        expect(subject.errors).to include('Product already present in cart')
-      end
-    end
   end
 end
