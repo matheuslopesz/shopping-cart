@@ -106,4 +106,73 @@ RSpec.describe "/carts", type: :request do
       end
     end
   end
+
+  describe "PATCH /update_item" do
+    let(:cart) { create(:cart) }
+    let(:product) { create(:product, name: "Test Product", price: 10.0) }
+    let(:valid_params) { { product_id: product.id, quantity: 2 } }
+
+    context "when the product is already in the cart" do
+      before do
+        cart.cart_items.create(product: product, quantity: 1)
+      end
+
+      it "updates the product quantity" do
+        patch '/carts/update_item', params: valid_params
+
+        expect(response).to have_http_status(:ok)
+        cart_response = JSON.parse(response.body)
+        expect(cart_response["products"].size).to eq(1)
+        expect(cart_response["products"].first["quantity"]).to eq(2)
+        expect(cart_response["total_price"]).to eq((product.price * 2).to_s)
+      end
+    end
+
+    context "when the product is not in the cart" do
+      it "adds the product to the cart" do
+        patch '/carts/update_item', params: valid_params
+
+        expect(response).to have_http_status(:ok)
+        cart_response = JSON.parse(response.body)
+        expect(cart_response["products"].size).to eq(1)
+        expect(cart_response["products"].first["quantity"]).to eq(2)
+        expect(cart_response["total_price"]).to eq((product.price * 2).to_s)
+      end
+    end
+
+    context "with invalid params" do
+      context "with missing product_id" do
+        let(:invalid_params) { { quantity: 2 } }
+
+        it "returns an error" do
+          patch '/carts/update_item', params: invalid_params
+
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(JSON.parse(response.body)).to include("errors" => ["Product id is required", "Product not found"])
+        end
+      end
+
+      context "with invalid quantity" do
+        let(:invalid_params) { { product_id: product.id, quantity: 0 } }
+
+        it "returns an error" do
+          patch '/carts/update_item', params: invalid_params
+
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(JSON.parse(response.body)).to include("errors" => ["Quantity must be greater than 0"])
+        end
+      end
+
+      context "with non-existent product" do
+        let(:invalid_params) { { product_id: 999999, quantity: 2 } }
+
+        it "returns an error" do
+          patch '/carts/update_item', params: invalid_params
+
+          expect(response).to have_http_status(:unprocessable_entity)
+          expect(JSON.parse(response.body)).to include("errors" => ["Product not found"])
+        end
+      end
+    end
+  end
 end
