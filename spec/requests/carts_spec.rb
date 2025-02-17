@@ -42,7 +42,33 @@ RSpec.describe "/carts", type: :request do
         )
       end
 
+      context "with multiple items" do
+        let(:product2) { create(:product, name: "Test Product 2", price: 20.0) }
+        let(:valid_params) { { product_id: product.id, quantity: 1 } }
+        let(:valid_params2) { { product_id: product2.id, quantity: 2 } }
 
+        it "adds multiple items to the cart" do
+          post '/carts/add_items', params: valid_params
+          post '/carts/add_items', params: valid_params2
+
+          expect(response).to have_http_status(:created)
+          cart_response = JSON.parse(response.body)
+          expect(cart_response["products"].size).to eq(2)
+          expect(cart_response["total_price"]).to eq((product.price * 1 + product2.price * 2).to_s)
+        end
+      end
+
+      context 'when the product already is in the cart' do
+        it 'increments the product quantity' do
+          post '/carts/add_items', params: valid_params
+          post '/carts/add_items', params: valid_params
+
+          expect(response).to have_http_status(:created)
+          cart_response = JSON.parse(response.body)
+          expect(cart_response["products"].size).to eq(1)
+          expect(cart_response["products"].first["quantity"]).to eq(2)
+        end
+      end
     end
 
     context "with invalid params" do

@@ -11,8 +11,9 @@ class CartsController < ApplicationController
     session[:cart_id] = @cart.id
 
     service = CartItems::CreateService.new(@cart, cart_item_params)
+
     if service.run
-      render json: CartSerializer.new(@cart).serialize, status: :created
+      render json: CartSerializer.new(@cart.reload).serialize, status: :created
     else
       render json: { errors: service.errors }, status: :unprocessable_entity
     end

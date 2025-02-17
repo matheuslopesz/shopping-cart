@@ -12,9 +12,11 @@ module CartItems
       return false unless valid?
 
       create_cart_item
+
       true
     rescue ActiveRecord::RecordInvalid => e
       add_error(e.message)
+
       false
     end
 
@@ -26,10 +28,16 @@ module CartItems
     end
 
     def create_cart_item
-      cart.cart_items.create!(
-        product: product,
-        quantity: params[:quantity]
-      )
+      cart_item = cart.cart_items.find_by(product_id: params[:product_id])
+    
+      if cart_item
+        cart_item.update!(quantity: cart_item.quantity + params[:quantity].to_i)
+      else
+        cart.cart_items.create!(
+          product: product,
+          quantity: params[:quantity]
+        )
+      end
     end
 
     def product
