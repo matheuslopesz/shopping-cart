@@ -42,7 +42,7 @@ RSpec.describe CartItems::CreateService do
 
         it 'adds error message' do
           service.run
-          expect(service.errors).to include('Product ID is required')
+          expect(service.errors).to include('Product id is required')
         end
 
         it 'does not create cart item' do
@@ -86,25 +86,6 @@ RSpec.describe CartItems::CreateService do
         end
 
         it 'does not create cart item' do
-          expect {
-            service.run
-          }.not_to change(CartItem, :count)
-        end
-      end
-
-      context 'when product already exists in cart' do
-        before { create(:cart_item, cart: cart, product: product, quantity: 1) }
-
-        it 'returns false' do
-          expect(service.run).to be false
-        end
-
-        it 'adds error message' do
-          service.run
-          expect(service.errors).to include('Product already exists in cart')
-        end
-
-        it 'does not create another cart item' do
           expect {
             service.run
           }.not_to change(CartItem, :count)

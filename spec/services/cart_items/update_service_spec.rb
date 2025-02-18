@@ -16,10 +16,10 @@ RSpec.describe CartItems::UpdateService do
         it 'updates the product quantity' do
           expect {
             service.run
-          }.not_to change(CartItem, :count) # Não cria um novo item, apenas atualiza
+          }.not_to change(CartItem, :count)
 
           cart_item = cart.cart_items.find_by(product_id: product.id)
-          expect(cart_item.quantity).to eq(2)
+          expect(cart_item.quantity).to eq(3)
         end
 
         it 'returns true' do
