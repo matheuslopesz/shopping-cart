@@ -11,7 +11,9 @@ module CartItems
     def run
       return false unless valid?
 
-      remove_cart_item
+      remove_or_decrement_cart_item
+      update_cart_total_price
+
       true
     rescue ActiveRecord::RecordInvalid => e
       add_error(e.message)
@@ -29,9 +31,18 @@ module CartItems
       end
     end
 
-    def remove_cart_item
+    def remove_or_decrement_cart_item
       cart_item = cart.cart_items.find_by(product_id: product_id)
-      cart_item.destroy!
+
+      if cart_item.quantity > 1
+        cart_item.update!(quantity: cart_item.quantity - 1)
+      else
+        cart_item.destroy!
+      end
+    end
+
+    def update_cart_total_price
+      cart.update!(total_price: cart.calculate_total_price)
     end
 
     def add_error(message)
