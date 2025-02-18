@@ -197,31 +197,82 @@ RSpec.describe '/carts', type: :request do
 
   describe 'DELETE /carts/remove_item' do
     let(:cart) { create(:cart) }
-    let(:product) { create(:product) }
-  
-    before do
-      cart.cart_items.create(product: product, quantity: 2)
+    let(:product) { create(:product, price: 10.0) }
+
+    context 'when the product is in the cart' do
+      before do
+        cart.cart_items.create(product: product, quantity: 2)
+        cart.update!(total_price: cart.calculate_total_price)
+      end
+
+      it 'removes the product from the cart' do
+        delete "/carts/remove_item", params: { product_id: product.id, cart_id: cart.id }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response['products'].size).to eq(1) # já que apenas um foi removido
+        expect(json_response['total_price']).to eq(10)
+      end
+
+      it 'updates the cart total price' do
+        expect {
+          delete "/carts/remove_item", params: { product_id: product.id, cart_id: cart.id }
+        }.to change {
+          cart.reload.total_price
+        }.from(20.00).to(10.00)
+      end
     end
-  
-    it 'removes the product from the cart' do
-      delete "/carts/remove_item", params: { product_id: product.id, cart_id: cart.id }
-  
-      expect(response).to have_http_status(:ok)
-      expect(json_response['products']).to be_empty
+
+    context 'when the product is not in the cart' do
+      it 'returns an error' do
+        delete "/carts/remove_item", params: { product_id: 999, cart_id: cart.id }
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(json_response['errors']).to include('Produto não encontrado no carrinho')
+      end
+
+      it 'does not change the cart items count' do
+        expect {
+          delete "/carts/remove_item", params: { product_id: 999, cart_id: cart.id }
+        }.not_to change(CartItem, :count)
+      end
     end
-  
-    it 'returns an error if the product is not in the cart' do
-      delete "/carts/remove_item", params: { product_id: 999, cart_id: cart.id }
-  
-      expect(response).to have_http_status(:unprocessable_entity)
-      expect(json_response['errors']).to include('Produto não encontrado no carrinho')
+
+    context 'when the cart does not exist' do
+      it 'returns an error' do
+        delete "/carts/remove_item", params: { product_id: product.id, cart_id: 999 }
+
+        expect(response).to have_http_status(:not_found)
+        expect(json_response['error']).to eq('Carrinho não encontrado')
+      end
+
+      it 'does not change the cart items count' do
+        expect {
+          delete "/carts/remove_item", params: { product_id: product.id, cart_id: 999 }
+        }.not_to change(CartItem, :count)
+      end
     end
-  
-    it 'returns an error if the cart does not exist' do
-      delete "/carts/remove_item", params: { product_id: product.id, cart_id: 999 }
-  
-      expect(response).to have_http_status(:not_found)
-      expect(json_response['error']).to eq('Carrinho não encontrado')
+
+    context 'when the product is in the cart with quantity > 1' do
+      before do
+        cart.cart_items.create(product: product, quantity: 3)
+        cart.update!(total_price: cart.calculate_total_price) # Atualiza o total_price
+      end
+
+      it 'decrements the product quantity' do
+        delete "/carts/remove_item", params: { product_id: product.id, cart_id: cart.id }
+
+        expect(response).to have_http_status(:ok)
+        expect(json_response['products'].first['quantity']).to eq(2)
+        expect(json_response['total_price']).to eq(20.0)
+      end
+
+      it 'updates the cart total price' do
+        expect {
+          delete "/carts/remove_item", params: { product_id: product.id, cart_id: cart.id }
+        }.to change {
+          cart.reload.total_price
+        }.from(30.0).to(20.0)
+      end
     end
   end
 
