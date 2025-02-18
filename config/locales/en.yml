@@ -1,4 +1,7 @@
 en:
+  cart:
+    errors:
+      not_found: "Cart not found"
   cart_item_validator:
     errors:
       product_id_required: "Product id is required"
