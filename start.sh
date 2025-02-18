@@ -14,6 +14,14 @@ while ! docker-compose exec db pg_isready -U postgres -h db; do
   sleep 2
 done
 
+# Criar o banco de dados de desenvolvimento
+echo "Criando o banco de dados de desenvolvimento..."
+docker-compose exec web bin/rails db:create
+
+# Criar o banco de dados de teste
+echo "Criando o banco de dados de teste..."
+docker-compose exec web bin/rails db:create RAILS_ENV=test
+
 # Executar migrações no banco de dados de desenvolvimento
 echo "Executando migrações no banco de dados de desenvolvimento..."
 docker-compose exec web bin/rails db:migrate
