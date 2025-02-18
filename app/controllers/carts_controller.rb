@@ -28,7 +28,7 @@ class CartsController < ApplicationController
 
   def set_cart
     @cart = Cart.find_by(id: session[:cart_id])
-    render_not_found("Carrinho não encontrado") unless @cart
+    render_not_found(I18n.t('cart.errors.not_found')) unless @cart
   end
 
   def cart_item_params

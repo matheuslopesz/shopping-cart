@@ -19,7 +19,7 @@ RSpec.describe '/carts', type: :request do
         get '/carts/999'
   
         expect(response).to have_http_status(:not_found)
-        expect(json_response).to include('error' => 'Carrinho não encontrado')
+        expect(json_response).to include('error' => 'Cart not found')
       end
     end
   end
@@ -257,7 +257,7 @@ RSpec.describe '/carts', type: :request do
         delete "/carts/remove_item", params: { product_id: product.id, cart_id: 999 }
 
         expect(response).to have_http_status(:not_found)
-        expect(json_response['error']).to eq('Carrinho não encontrado')
+        expect(json_response['error']).to eq('Cart not found')
       end
 
       it 'does not change the cart items count' do
