@@ -3,15 +3,19 @@ require "rails_helper"
 RSpec.describe CartsController, type: :routing do
   describe 'routes' do
     it 'routes to #show' do
-      expect(get: '/cart').to route_to('carts#show')
+      expect(get: '/carts/1').to route_to('carts#show', id: '1')
     end
 
     it 'routes to #create' do
-      pending "#TODO: Escreva um teste para validar a criação de um carrinho #{__FILE__}" 
+      expect(post: '/carts').to route_to('carts#create')
     end
 
-    it 'routes to #add_item via POST' do
-      expect(post: '/cart/add_item').to route_to('carts#add_item')
+    it 'routes to #add_item via PATCH' do
+      expect(patch: '/carts/add_item').to route_to('carts#update')
+    end
+
+    it 'routes to #remove_item via DELETE' do
+      expect(delete: '/carts/remove_item').to route_to('carts#remove_item')
     end
   end
-end 
+end
