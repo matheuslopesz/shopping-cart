@@ -24,7 +24,7 @@ module CartItems
 
     def valid?
       if cart.cart_items.find_by(product_id: product_id).nil?
-        add_error("Produto não encontrado no carrinho")
+        add_error(I18n.t('cart.errors.product_not_found_in_cart'))
         false
       else
         true

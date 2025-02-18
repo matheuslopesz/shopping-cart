@@ -2,6 +2,7 @@ en:
   cart:
     errors:
       not_found: "Cart not found"
+      product_not_found_in_cart: 'Product not found in cart'
   cart_item_validator:
     errors:
       product_id_required: "Product id is required"

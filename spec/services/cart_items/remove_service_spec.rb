@@ -67,7 +67,7 @@ RSpec.describe CartItems::RemoveService do
 
       it 'adds error message' do
         service.run
-        expect(service.errors).to include('Produto não encontrado no carrinho')
+        expect(service.errors).to include('Product not found in cart')
       end
 
       it 'does not change the cart items count' do
@@ -84,7 +84,7 @@ RSpec.describe CartItems::RemoveService do
 
       it 'adds error message' do
         service.run
-        expect(service.errors).to include('Produto não encontrado no carrinho')
+        expect(service.errors).to include('Product not found in cart')
       end
 
       it 'does not change the cart items count' do

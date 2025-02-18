@@ -238,7 +238,7 @@ RSpec.describe '/carts', type: :request do
         delete "/carts/remove_item", params: { product_id: 999, cart_id: cart.id }
 
         expect(response).to have_http_status(:unprocessable_entity)
-        expect(json_response['errors']).to include('Produto não encontrado no carrinho')
+        expect(json_response['errors']).to include('Product not found in cart')
       end
 
       it 'does not change the cart items count' do
