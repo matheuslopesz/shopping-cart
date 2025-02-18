@@ -26,9 +26,13 @@ docker-compose exec web bin/rails db:migrate RAILS_ENV=test
 echo "Verificando migrações pendentes..."
 docker-compose exec web bin/rails db:migrate:status
 
-# Iniciar o servidor Rails (se necessário)
+# Remover o arquivo server.pid se existir
+echo "Removendo arquivo server.pid se existir..."
+docker-compose exec web rm -f /rails/tmp/pids/server.pid
+
+# Iniciar o servidor Rails (se não estiver em execução)
 echo "Iniciando o servidor Rails..."
-docker-compose exec web bin/rails server -b 0.0.0.0
+docker-compose exec -d web bin/rails server -b 0.0.0.0
 
 # Mensagem final
 echo "Ambiente Docker configurado e pronto para uso!"
