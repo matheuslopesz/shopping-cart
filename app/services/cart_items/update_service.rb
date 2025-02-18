@@ -41,7 +41,7 @@ module CartItems
     end
 
     def update_cart_total_price
-      cart.update!(total_price: cart.total_price)
+      cart.update!(total_price: cart.calculate_total_price)
     end
 
     def product
