@@ -12,6 +12,8 @@ module CartItems
       return false unless valid?
 
       update_cart_item
+      update_cart_total_price
+
       true
     rescue ActiveRecord::RecordInvalid => e
       add_error(e.message)
@@ -29,13 +31,17 @@ module CartItems
       cart_item = cart.cart_items.find_by(product_id: params[:product_id])
 
       if cart_item
-        cart_item.update!(quantity: params[:quantity])
+        cart_item.update!(quantity: cart_item.quantity + params[:quantity].to_i)
       else
         cart.cart_items.create!(
           product: product,
           quantity: params[:quantity]
         )
       end
+    end
+
+    def update_cart_total_price
+      cart.update!(total_price: cart.total_price)
     end
 
     def product

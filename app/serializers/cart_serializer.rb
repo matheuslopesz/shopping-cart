@@ -32,6 +32,6 @@ class CartSerializer
   end
 
   def formatted_price(price)
-    price.round(2)
+    price.to_f.round(2)
   end
 end

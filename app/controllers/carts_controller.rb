@@ -20,8 +20,7 @@ class CartsController < ApplicationController
   end
 
   def update
-    @cart = Cart.find_or_create_by(id: session[:cart_id])
-    session[:cart_id] = @cart.id
+    @cart = Cart.find_or_create_by(id: params[:cart_id])
   
     service = CartItems::UpdateService.new(@cart, cart_item_params)
   

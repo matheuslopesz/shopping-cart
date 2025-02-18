@@ -12,6 +12,7 @@ module CartItems
       return false unless valid?
 
       create_cart_item
+      update_cart_total_price
 
       true
     rescue ActiveRecord::RecordInvalid => e
@@ -38,6 +39,10 @@ module CartItems
           quantity: params[:quantity]
         )
       end
+    end
+
+    def update_cart_total_price
+      cart.update!(total_price: cart.total_price)
     end
 
     def product

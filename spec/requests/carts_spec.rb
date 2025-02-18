@@ -37,13 +37,13 @@ RSpec.describe '/carts', type: :request do
           'products' => [
             {
               'id' => product.id,
-              'name' => product.name,
+              'name' => 'Test Product',
               'quantity' => 1,
-              'unit_price' => product.price.to_s,
-              'total_price' => (product.price * 1).to_s
+              'unit_price' => 10.00,
+              'total_price' => 10.00
             }
           ],
-          'total_price' => (product.price * 1).to_s
+          'total_price' => 10.00
         )
       end
   
@@ -57,7 +57,7 @@ RSpec.describe '/carts', type: :request do
   
           expect(response).to have_http_status(:created)
           expect(json_response['products'].size).to eq(2)
-          expect(json_response['total_price']).to eq((product.price * 1 + product2.price * 2).to_s)
+          expect(json_response['total_price']).to eq(50.00)
         end
       end
   
@@ -69,6 +69,7 @@ RSpec.describe '/carts', type: :request do
           expect(response).to have_http_status(:created)
           expect(json_response['products'].size).to eq(1)
           expect(json_response['products'].first['quantity']).to eq(2)
+          expect(json_response['total_price']).to eq(20.00)
         end
       end
     end
@@ -112,7 +113,7 @@ RSpec.describe '/carts', type: :request do
   describe 'PATCH /carts/add_item' do
     let(:cart) { create(:cart) }
     let(:product) { create(:product, name: 'Test Product', price: 10.0) }
-    let(:valid_params) { { product_id: product.id, quantity: 2 } }
+    let(:valid_params) { { product_id: product.id, quantity: 2, cart_id: cart.id } }
 
     context 'when the product is already in the cart' do
       before do
@@ -127,13 +128,13 @@ RSpec.describe '/carts', type: :request do
           'products' => [
             {
               'id' => product.id,
-              'name' => product.name,
-              'quantity' => 2,
-              'unit_price' => product.price.to_s,
-              'total_price' => (product.price * 2).to_s
+              'name' => 'Test Product',
+              'quantity' => 3,
+              'unit_price' => 10.00,
+              'total_price' => 30.00
             }
           ],
-          'total_price' => (product.price * 2).to_s
+          'total_price' => 30.00
         )
       end
     end
@@ -149,11 +150,11 @@ RSpec.describe '/carts', type: :request do
               'id' => product.id,
               'name' => product.name,
               'quantity' => 2,
-              'unit_price' => product.price.to_s,
-              'total_price' => (product.price * 2).to_s
+              'unit_price' => 10.00,
+              'total_price' => 20.00
             }
           ],
-          'total_price' => (product.price * 2).to_s
+          'total_price' => 20.00
         )
       end
     end
@@ -194,7 +195,7 @@ RSpec.describe '/carts', type: :request do
     end
   end
 
-  describe "DELETE /carts/remove_item" do
+  describe 'DELETE /carts/remove_item' do
     let(:cart) { create(:cart) }
     let(:product) { create(:product) }
   
@@ -206,21 +207,21 @@ RSpec.describe '/carts', type: :request do
       delete "/carts/remove_item", params: { product_id: product.id, cart_id: cart.id }
   
       expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)['products']).to be_empty
+      expect(json_response['products']).to be_empty
     end
   
     it 'returns an error if the product is not in the cart' do
       delete "/carts/remove_item", params: { product_id: 999, cart_id: cart.id }
   
       expect(response).to have_http_status(:unprocessable_entity)
-      expect(JSON.parse(response.body)['errors']).to include('Produto não encontrado no carrinho')
+      expect(json_response['errors']).to include('Produto não encontrado no carrinho')
     end
   
     it 'returns an error if the cart does not exist' do
       delete "/carts/remove_item", params: { product_id: product.id, cart_id: 999 }
   
       expect(response).to have_http_status(:not_found)
-      expect(JSON.parse(response.body)['error']).to eq('Carrinho não encontrado')
+      expect(json_response['error']).to eq('Carrinho não encontrado')
     end
   end
 
