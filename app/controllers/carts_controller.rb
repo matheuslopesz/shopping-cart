@@ -6,7 +6,7 @@ class CartsController < ApplicationController
     render json: serializer.serialize
   end
 
-  def add_items
+  def create
     @cart = Cart.find_or_create_by(id: session[:cart_id])
     session[:cart_id] = @cart.id
 
@@ -19,7 +19,7 @@ class CartsController < ApplicationController
     end
   end
 
-  def update_item
+  def update
     @cart = Cart.find_or_create_by(id: session[:cart_id])
     session[:cart_id] = @cart.id
   

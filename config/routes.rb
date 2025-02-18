@@ -7,10 +7,9 @@ Rails.application.routes.draw do
 
   root "rails/health#show"
 
-  resources :carts, only: [:show] do
+  resources :carts, only: %i[show create] do
     collection do
-      post :add_items
-      patch :update_item
+      patch :add_item, to: 'carts#update'
       delete :remove_item, to: 'carts#remove_item'
     end
   end

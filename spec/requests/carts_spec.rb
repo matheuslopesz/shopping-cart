@@ -1,176 +1,194 @@
 require 'rails_helper'
 
-RSpec.describe "/carts", type: :request do
-  describe "GET /cart/:id" do
+RSpec.describe '/carts', type: :request do
+  describe 'GET /cart/:id' do
     let(:cart) { create(:cart) }
 
-    it "returns the cart details" do
-      get "/carts/#{cart.id}"
-      expect(response).to have_http_status(:ok)
-      expect(JSON.parse(response.body)).to include("id" => cart.id)
+    context 'when the cart exists' do
+      it 'returns the cart details' do
+        get "/carts/#{cart.id}"
+  
+        expect(response).to have_http_status(:ok)
+        expect(json_response).to include('id' => cart.id)
+      end
     end
-
-    it "returns a not found error if the cart does not exist" do
-      get "/carts/999"
-
-      expect(response).to have_http_status(:not_found)
-      expect(JSON.parse(response.body)).to include("error" => "Carrinho não encontrado")
+  
+    context 'when the cart does not exist' do
+      it 'returns a not found error' do
+        get '/carts/999'
+  
+        expect(response).to have_http_status(:not_found)
+        expect(json_response).to include('error' => 'Carrinho não encontrado')
+      end
     end
   end
 
-  describe "POST /add_items" do
-    let(:product) { create(:product, name: "Test Product", price: 10.0) }
+  describe 'POST /carts' do
+    let(:product) { create(:product, name: 'Test Product', price: 10.0) }
     let(:valid_params) { { product_id: product.id, quantity: 1 } }
-
-    context "with valid params" do
-      it "creates a new cart and adds the item" do
-        post '/carts/add_items', params: valid_params
-
+  
+    context 'with valid params' do
+      it 'creates a new cart and adds the item' do
+        post '/carts', params: valid_params
+  
         expect(response).to have_http_status(:created)
-        expect(JSON.parse(response.body)).to include(
-          "id" => be_present,
-          "products" => [
+        expect(json_response).to include(
+          'id' => be_present,
+          'products' => [
             {
-              "id" => product.id,
-              "name" => product.name,
-              "quantity" => 1,
-              "unit_price" => product.price.to_s,
-              "total_price" => (product.price * 1).to_s
+              'id' => product.id,
+              'name' => product.name,
+              'quantity' => 1,
+              'unit_price' => product.price.to_s,
+              'total_price' => (product.price * 1).to_s
             }
           ],
-          "total_price" => (product.price * 1).to_s
+          'total_price' => (product.price * 1).to_s
         )
       end
-
-      context "with multiple items" do
-        let(:product2) { create(:product, name: "Test Product 2", price: 20.0) }
-        let(:valid_params) { { product_id: product.id, quantity: 1 } }
+  
+      context 'with multiple items' do
+        let(:product2) { create(:product, name: 'Test Product 2', price: 20.0) }
         let(:valid_params2) { { product_id: product2.id, quantity: 2 } }
-
-        it "adds multiple items to the cart" do
-          post '/carts/add_items', params: valid_params
-          post '/carts/add_items', params: valid_params2
-
+  
+        it 'adds multiple items to the cart' do
+          post '/carts', params: valid_params
+          post '/carts', params: valid_params2
+  
           expect(response).to have_http_status(:created)
-          cart_response = JSON.parse(response.body)
-          expect(cart_response["products"].size).to eq(2)
-          expect(cart_response["total_price"]).to eq((product.price * 1 + product2.price * 2).to_s)
+          expect(json_response['products'].size).to eq(2)
+          expect(json_response['total_price']).to eq((product.price * 1 + product2.price * 2).to_s)
         end
       end
-
-      context 'when the product already is in the cart' do
+  
+      context 'when the product is already in the cart' do
         it 'increments the product quantity' do
-          post '/carts/add_items', params: valid_params
-          post '/carts/add_items', params: valid_params
-
+          post '/carts', params: valid_params
+          post '/carts', params: valid_params
+  
           expect(response).to have_http_status(:created)
-          cart_response = JSON.parse(response.body)
-          expect(cart_response["products"].size).to eq(1)
-          expect(cart_response["products"].first["quantity"]).to eq(2)
+          expect(json_response['products'].size).to eq(1)
+          expect(json_response['products'].first['quantity']).to eq(2)
         end
       end
     end
-
-    context "with invalid params" do
-      context "with missing product_id" do
+  
+    context 'with invalid params' do
+      context 'with missing product_id' do
         let(:invalid_params) { { quantity: 1 } }
-
-        it "returns an error" do
-          post '/carts/add_items', params: invalid_params
-
+  
+        it 'returns an error' do
+          post '/carts', params: invalid_params
+  
           expect(response).to have_http_status(:unprocessable_entity)
-          expect(JSON.parse(response.body)).to include("errors" => ["Product id is required", "Product not found"])
+          expect(json_response['errors']).to include('Product id is required', 'Product not found')
         end
       end
-
-      context "with invalid quantity" do
+  
+      context 'with invalid quantity' do
         let(:invalid_params) { { product_id: product.id, quantity: 0 } }
-
-        it "returns an error" do
-          post '/carts/add_items', params: invalid_params
-
+  
+        it 'returns an error' do
+          post '/carts', params: invalid_params
+  
           expect(response).to have_http_status(:unprocessable_entity)
-          expect(JSON.parse(response.body)).to include("errors" => ["Quantity must be greater than 0"])
+          expect(json_response['errors']).to include('Quantity must be greater than 0')
         end
       end
-
-      context "with non-existent product" do
-        let(:invalid_params) { { product_id: 999999, quantity: 1 } }
-
-        it "returns an error" do
-          post '/carts/add_items', params: invalid_params
-
+  
+      context 'with non-existent product' do
+        let(:invalid_params) { { product_id: 999_999, quantity: 1 } }
+  
+        it 'returns an error' do
+          post '/carts', params: invalid_params
+  
           expect(response).to have_http_status(:unprocessable_entity)
-          expect(JSON.parse(response.body)).to include("errors" => ["Product not found"])
+          expect(json_response['errors']).to include('Product not found')
         end
       end
-    end
+    end  
   end
 
-  describe "PATCH /update_item" do
+  describe 'PATCH /carts/add_item' do
     let(:cart) { create(:cart) }
-    let(:product) { create(:product, name: "Test Product", price: 10.0) }
+    let(:product) { create(:product, name: 'Test Product', price: 10.0) }
     let(:valid_params) { { product_id: product.id, quantity: 2 } }
 
-    context "when the product is already in the cart" do
+    context 'when the product is already in the cart' do
       before do
         cart.cart_items.create(product: product, quantity: 1)
       end
 
-      it "updates the product quantity" do
-        patch '/carts/update_item', params: valid_params
+      it 'updates the product quantity' do
+        patch '/carts/add_item', params: valid_params
 
         expect(response).to have_http_status(:ok)
-        cart_response = JSON.parse(response.body)
-        expect(cart_response["products"].size).to eq(1)
-        expect(cart_response["products"].first["quantity"]).to eq(2)
-        expect(cart_response["total_price"]).to eq((product.price * 2).to_s)
+        expect(json_response).to include(
+          'products' => [
+            {
+              'id' => product.id,
+              'name' => product.name,
+              'quantity' => 2,
+              'unit_price' => product.price.to_s,
+              'total_price' => (product.price * 2).to_s
+            }
+          ],
+          'total_price' => (product.price * 2).to_s
+        )
       end
     end
 
-    context "when the product is not in the cart" do
-      it "adds the product to the cart" do
-        patch '/carts/update_item', params: valid_params
+    context 'when the product is not in the cart' do
+      it 'adds the product to the cart' do
+        patch '/carts/add_item', params: valid_params
 
         expect(response).to have_http_status(:ok)
-        cart_response = JSON.parse(response.body)
-        expect(cart_response["products"].size).to eq(1)
-        expect(cart_response["products"].first["quantity"]).to eq(2)
-        expect(cart_response["total_price"]).to eq((product.price * 2).to_s)
+        expect(json_response).to include(
+          'products' => [
+            {
+              'id' => product.id,
+              'name' => product.name,
+              'quantity' => 2,
+              'unit_price' => product.price.to_s,
+              'total_price' => (product.price * 2).to_s
+            }
+          ],
+          'total_price' => (product.price * 2).to_s
+        )
       end
     end
 
-    context "with invalid params" do
-      context "with missing product_id" do
+    context 'with invalid params' do
+      context 'with missing product_id' do
         let(:invalid_params) { { quantity: 2 } }
 
-        it "returns an error" do
-          patch '/carts/update_item', params: invalid_params
+        it 'returns an error' do
+          patch '/carts/add_item', params: invalid_params
 
           expect(response).to have_http_status(:unprocessable_entity)
-          expect(JSON.parse(response.body)).to include("errors" => ["Product id is required", "Product not found"])
+          expect(json_response['errors']).to include('Product id is required', 'Product not found')
         end
       end
 
-      context "with invalid quantity" do
+      context 'with invalid quantity' do
         let(:invalid_params) { { product_id: product.id, quantity: 0 } }
 
-        it "returns an error" do
-          patch '/carts/update_item', params: invalid_params
+        it 'returns an error' do
+          patch '/carts/add_item', params: invalid_params
 
           expect(response).to have_http_status(:unprocessable_entity)
-          expect(JSON.parse(response.body)).to include("errors" => ["Quantity must be greater than 0"])
+          expect(json_response['errors']).to include('Quantity must be greater than 0')
         end
       end
 
-      context "with non-existent product" do
-        let(:invalid_params) { { product_id: 999999, quantity: 2 } }
+      context 'with non-existent product' do
+        let(:invalid_params) { { product_id: 999_999, quantity: 2 } }
 
-        it "returns an error" do
-          patch '/carts/update_item', params: invalid_params
+        it 'returns an error' do
+          patch '/carts/add_item', params: invalid_params
 
           expect(response).to have_http_status(:unprocessable_entity)
-          expect(JSON.parse(response.body)).to include("errors" => ["Product not found"])
+          expect(json_response['errors']).to include('Product not found')
         end
       end
     end
@@ -204,5 +222,11 @@ RSpec.describe "/carts", type: :request do
       expect(response).to have_http_status(:not_found)
       expect(JSON.parse(response.body)['error']).to eq('Carrinho não encontrado')
     end
+  end
+
+  private
+
+  def json_response
+    JSON.parse(response.body)
   end
 end
