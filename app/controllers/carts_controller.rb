@@ -20,10 +20,10 @@ class CartsController < ApplicationController
   end
 
   def update
-    @cart = Cart.find_or_create_by(id: params[:cart_id])
-  
+    @cart = Cart.find_by(id: session[:cart_id])
+
     service = CartItems::UpdateService.new(@cart, cart_item_params)
-  
+
     if service.run
       render json: CartSerializer.new(@cart.reload).serialize, status: :ok
     else
@@ -32,8 +32,8 @@ class CartsController < ApplicationController
   end
 
   def remove_item
-    @cart = Cart.find_by(id: params[:cart_id])
-
+    @cart = Cart.find_by(id: session[:cart_id])
+  
     if @cart
       service = CartItems::RemoveService.new(@cart, params[:product_id])
 
@@ -50,7 +50,7 @@ class CartsController < ApplicationController
   private
 
   def set_cart
-    @cart = Cart.find_by(id: params[:id])
+    @cart = Cart.find_by(id: session[:cart_id])
 
     render json: { error: "Carrinho não encontrado" }, status: :not_found unless @cart
   end

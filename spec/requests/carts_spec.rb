@@ -6,8 +6,9 @@ RSpec.describe '/carts', type: :request do
 
     context 'when the cart exists' do
       it 'returns the cart details' do
+        allow_any_instance_of(ApplicationController).to receive(:session).and_return(cart_id: cart.id)
         get "/carts/#{cart.id}"
-  
+    
         expect(response).to have_http_status(:ok)
         expect(json_response).to include('id' => cart.id)
       end
@@ -29,6 +30,8 @@ RSpec.describe '/carts', type: :request do
   
     context 'with valid params' do
       it 'creates a new cart and adds the item' do
+        allow_any_instance_of(ApplicationController).to receive(:session).and_return(cart_id: nil)
+
         post '/carts', params: valid_params
   
         expect(response).to have_http_status(:created)
@@ -115,6 +118,10 @@ RSpec.describe '/carts', type: :request do
     let(:product) { create(:product, name: 'Test Product', price: 10.0) }
     let(:valid_params) { { product_id: product.id, quantity: 2, cart_id: cart.id } }
 
+    before do
+      allow_any_instance_of(ApplicationController).to receive(:session).and_return(cart_id: cart.id)
+    end
+
     context 'when the product is already in the cart' do
       before do
         cart.cart_items.create(product: product, quantity: 1)
@@ -199,6 +206,10 @@ RSpec.describe '/carts', type: :request do
     let(:cart) { create(:cart) }
     let(:product) { create(:product, price: 10.0) }
 
+    before do
+      allow_any_instance_of(ApplicationController).to receive(:session).and_return(cart_id: cart.id)
+    end
+
     context 'when the product is in the cart' do
       before do
         cart.cart_items.create(product: product, quantity: 2)
@@ -238,6 +249,10 @@ RSpec.describe '/carts', type: :request do
     end
 
     context 'when the cart does not exist' do
+      before do
+        allow_any_instance_of(ApplicationController).to receive(:session).and_return(cart_id: nil)
+      end
+
       it 'returns an error' do
         delete "/carts/remove_item", params: { product_id: product.id, cart_id: 999 }
 
@@ -255,7 +270,7 @@ RSpec.describe '/carts', type: :request do
     context 'when the product is in the cart with quantity > 1' do
       before do
         cart.cart_items.create(product: product, quantity: 3)
-        cart.update!(total_price: cart.calculate_total_price) # Atualiza o total_price
+        cart.update!(total_price: cart.calculate_total_price)
       end
 
       it 'decrements the product quantity' do
