@@ -12,7 +12,7 @@ module CartItems
       return false unless valid?
 
       update_cart_item
-      update_cart_total_price
+      recalculate_cart_total_price
 
       true
     rescue ActiveRecord::RecordInvalid => e
@@ -23,8 +23,12 @@ module CartItems
     private
 
     def valid?
-      validator = ::CartItemValidator.new(params, cart)
-      validator.valid?.tap { |valid| @errors = validator.errors unless valid }
+      validator = CartItemValidator.new(params, cart)
+      is_valid = validator.valid?
+
+      @errors = validator.errors unless is_valid
+
+      is_valid
     end
 
     def update_cart_item
@@ -40,7 +44,7 @@ module CartItems
       end
     end
 
-    def update_cart_total_price
+    def recalculate_cart_total_price
       cart.update!(total_price: cart.calculate_total_price)
     end
 

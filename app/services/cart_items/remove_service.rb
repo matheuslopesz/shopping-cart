@@ -12,7 +12,7 @@ module CartItems
       return false unless valid?
 
       remove_or_decrement_cart_item
-      update_cart_total_price
+      recalculate_cart_total_price
 
       true
     rescue ActiveRecord::RecordInvalid => e
@@ -41,7 +41,7 @@ module CartItems
       end
     end
 
-    def update_cart_total_price
+    def recalculate_cart_total_price
       cart.update!(total_price: cart.calculate_total_price)
     end
 

@@ -11,37 +11,40 @@ module CartItems
     def run
       return false unless valid?
 
-      create_cart_item
-      update_cart_total_price
+      create_or_update_cart_item
+      recalculate_cart_total_price
 
       true
     rescue ActiveRecord::RecordInvalid => e
       add_error(e.message)
-
       false
     end
 
     private
 
     def valid?
-      validator = ::CartItemValidator.new(params, cart)
-      validator.valid?.tap { |valid| @errors = validator.errors unless valid }
+      validator = CartItemValidator.new(params, cart)
+      is_valid = validator.valid?
+
+      @errors = validator.errors unless is_valid
+
+      is_valid
     end
 
-    def create_cart_item
-      cart_item = cart.cart_items.find_by(product_id: params[:product_id])
-    
-      if cart_item
-        cart_item.update!(quantity: cart_item.quantity + params[:quantity].to_i)
-      else
-        cart.cart_items.create!(
-          product: product,
-          quantity: params[:quantity]
-        )
+    def create_or_update_cart_item
+      cart_item = find_or_initialize_cart_item
+      cart_item.quantity += params[:quantity].to_i
+      cart_item.save!
+    end
+
+    def find_or_initialize_cart_item
+      cart.cart_items.find_or_initialize_by(product_id: params[:product_id]) do |item|
+        item.product = product
+        item.quantity = 0
       end
     end
 
-    def update_cart_total_price
+    def recalculate_cart_total_price
       cart.update!(total_price: cart.calculate_total_price)
     end
 
