@@ -1,6 +1,4 @@
 class Cart < ApplicationRecord
-  ABANDONMENT_THRESHOLD = 2.hours
-
   has_many :products, through: :cart_items
   has_many :cart_items, dependent: :destroy
 
