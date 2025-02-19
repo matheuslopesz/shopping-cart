@@ -13,6 +13,7 @@ module CartItems
 
       remove_or_decrement_cart_item
       recalculate_cart_total_price
+      update_last_interaction
 
       true
     rescue ActiveRecord::RecordInvalid => e
@@ -47,6 +48,10 @@ module CartItems
 
     def add_error(message)
       @errors << message
+    end
+
+    def update_last_interaction
+      cart.update!(last_interaction_at: Time.current)
     end
   end
 end

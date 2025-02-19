@@ -42,6 +42,8 @@ module CartItems
           quantity: params[:quantity]
         )
       end
+
+      cart.update(last_interaction_at: Time.current)
     end
 
     def recalculate_cart_total_price

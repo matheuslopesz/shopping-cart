@@ -35,6 +35,7 @@ module CartItems
       cart_item = find_or_initialize_cart_item
       cart_item.quantity += params[:quantity].to_i
       cart_item.save!
+      cart.update(last_interaction_at: Time.current)
     end
 
     def find_or_initialize_cart_item
